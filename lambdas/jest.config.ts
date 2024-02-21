@@ -4,9 +4,12 @@
  */
 
 export default {
+    testEnvironment: 'node',
     transform: {
         '^.+\\.ts?$': 'ts-jest',
+        '^.+.js?$': 'babel-jest',
     },
+    transformIgnorePatterns: ['node_modules/(?!nanoid)'],
     clearMocks: true,
     collectCoverage: true,
     coverageDirectory: 'coverage',
