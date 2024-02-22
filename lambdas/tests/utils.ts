@@ -100,6 +100,16 @@ export function mockDynamoDBClient() {
                             }
                             mockedStore.set(cmd.Item.alias.S, cmd.Item);
                             return;
+                        case 'UpdateItemCommand':
+                            const current = mockedStore.get(cmd.Key.alias.S);
+                            if (!current) {
+                                throw new Error('Item not found');
+                            }
+                            mockedStore.set(cmd.Key.alias.S, {
+                                ...current,
+                                access_count: { N: (parseInt(current.access_count.N) + 1).toString() },
+                            });
+                            return;
                         case 'GetItemCommand':
                             return { Item: mockedStore.get(cmd.Key.alias.S) };
                     }
@@ -107,6 +117,7 @@ export function mockDynamoDBClient() {
             })),
             PutItemCommand: jest.fn((obj: any) => ({ ...obj, _cmd: 'PutItemCommand' })),
             GetItemCommand: jest.fn((obj: any) => ({ ...obj, _cmd: 'GetItemCommand' })),
+            UpdateItemCommand: jest.fn((obj: any) => ({ ...obj, _cmd: 'UpdateItemCommand' })),
         };
     });
 }

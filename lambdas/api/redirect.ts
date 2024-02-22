@@ -1,6 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { newHandler } from '../core/api';
-import { DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb';
+import { DynamoDBClient, GetItemCommand, UpdateItemCommand } from '@aws-sdk/client-dynamodb';
 
 /**
  * @openapi
@@ -57,6 +57,19 @@ const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResu
             }),
         };
     }
+
+    await client.send(
+        new UpdateItemCommand({
+            TableName: process.env.TABLE_NAME!,
+            Key: {
+                alias: { S: alias },
+            },
+            UpdateExpression: 'SET access_count = access_count + :one',
+            ExpressionAttributeValues: {
+                ':one': { N: '1' },
+            },
+        }),
+    );
 
     return {
         statusCode: 302,
