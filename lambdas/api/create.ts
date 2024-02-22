@@ -10,6 +10,7 @@ import { Validator } from '../core/validation';
  *    post:
  *      summary: Create a short URL
  *      requestBody:
+ *        description: The original URL and an **optional** custom alias. The custom alias must be unique and have a length between 3 and 20. If none is provided, a random one is generated with length of 8.
  *        content:
  *          application/json:
  *            schema:
@@ -49,7 +50,7 @@ import { Validator } from '../core/validation';
  *                invalidAlias:
  *                  summary: Custom alias length or format invalid
  *                  value:
- *                    message: Alias validation error
+ *                    message: alias must have length between 3 and 20
  *        '409':
  *          description: Conflict
  *          content:
