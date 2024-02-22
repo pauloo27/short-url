@@ -44,6 +44,20 @@ describe('Unit test for create short url handler', function () {
         );
     });
 
+    it('should not allow original_url if type is not a valid url', async () => {
+        const event = newGatewayEvent('post', '/urls', {
+            original_url: 'notaurl',
+        });
+        const result = await lambdaHandler(event);
+
+        expect(result.statusCode).toEqual(422);
+        expect(result.body).toEqual(
+            JSON.stringify({
+                message: 'original_url must be an url',
+            }),
+        );
+    });
+
     it('should be case sensitive', async () => {
         const event = newGatewayEvent('post', '/urls', {
             original_URL: '123',

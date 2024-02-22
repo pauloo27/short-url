@@ -69,7 +69,7 @@ const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResu
 
     const parsedBody = JSON.parse(event.body);
     const validator = new Validator(parsedBody);
-    validator.mustBeProvided('original_url').mustBeString('original_url');
+    validator.mustBeProvided('original_url').mustBeString('original_url').mustBeUrl('original_url');
 
     const originalUrl = parsedBody.original_url;
 

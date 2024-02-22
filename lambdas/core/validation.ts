@@ -25,6 +25,18 @@ export class Validator<T extends Record<string, unknown>> {
         return this;
     }
 
+    mustBeUrl(fieldName: string): Validator<T> {
+        const value = this.body[fieldName];
+        const urlRe =
+            /^(https:\/\/www\.|http:\/\/www\.|https:\/\/|http:\/\/)?[a-zA-Z0-9]{2,}(\.[a-zA-Z0-9]{2,})(\.[a-zA-Z0-9]{2,})?$/;
+
+        if (!urlRe.test(value as string)) {
+            throw new ValidationError(`${fieldName} must be an url`);
+        }
+
+        return this;
+    }
+
     mustHaveLengthBetween(fieldName: string, min: number, max: number): Validator<T> {
         const value = this.body[fieldName] as { length: number };
 
