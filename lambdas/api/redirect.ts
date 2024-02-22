@@ -2,6 +2,28 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { newHandler } from '../core/api';
 import { DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb';
 
+/**
+ * @openapi
+ * /urls/{alias}:
+ *    get:
+ *      summary: Redirect by alias
+ *      parameters:
+ *        - name: alias
+ *          in: path
+ *          required: true
+ *          description: The alias for redirection
+ *          schema:
+ *            type: string
+ *      responses:
+ *        '302':
+ *          description: Redirect successful, with Location header
+ *        '404':
+ *          description: Alias not found
+ *          content:
+ *            application/json:
+ *              example:
+ *                message: 'Alias not found'
+*/
 const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     const alias = event.pathParameters?.alias;
     if (!alias) {
