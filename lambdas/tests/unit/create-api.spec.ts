@@ -2,14 +2,13 @@ import { mockDynamoDBClient, mockNanoId, newGatewayEvent, peekNanoId } from '../
 mockDynamoDBClient();
 mockNanoId();
 
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { lambdaHandler } from '../../api/create';
 import { expect, describe, it } from '@jest/globals';
 
 describe('Unit test for create short url handler', function () {
     it('should not allow empty body', async () => {
-        const event: APIGatewayProxyEvent = newGatewayEvent('post', '/urls');
-        const result: APIGatewayProxyResult = await lambdaHandler(event);
+        const event = newGatewayEvent('post', '/urls');
+        const result = await lambdaHandler(event);
 
         expect(result.statusCode).toEqual(400);
         expect(result.body).toEqual(
@@ -20,8 +19,8 @@ describe('Unit test for create short url handler', function () {
     });
 
     it('should not allow empty original_url', async () => {
-        const event: APIGatewayProxyEvent = newGatewayEvent('post', '/urls', {});
-        const result: APIGatewayProxyResult = await lambdaHandler(event);
+        const event = newGatewayEvent('post', '/urls', {});
+        const result = await lambdaHandler(event);
 
         expect(result.statusCode).toEqual(422);
         expect(result.body).toEqual(
@@ -32,10 +31,10 @@ describe('Unit test for create short url handler', function () {
     });
 
     it('should not allow original_url if type is not string', async () => {
-        const event: APIGatewayProxyEvent = newGatewayEvent('post', '/urls', {
+        const event = newGatewayEvent('post', '/urls', {
             original_url: 123,
         });
-        const result: APIGatewayProxyResult = await lambdaHandler(event);
+        const result = await lambdaHandler(event);
 
         expect(result.statusCode).toEqual(422);
         expect(result.body).toEqual(
@@ -46,10 +45,10 @@ describe('Unit test for create short url handler', function () {
     });
 
     it('should be case sensitive', async () => {
-        const event: APIGatewayProxyEvent = newGatewayEvent('post', '/urls', {
+        const event = newGatewayEvent('post', '/urls', {
             original_URL: '123',
         });
-        const result: APIGatewayProxyResult = await lambdaHandler(event);
+        const result = await lambdaHandler(event);
 
         expect(result.statusCode).toEqual(422);
         expect(result.body).toEqual(
@@ -63,10 +62,10 @@ describe('Unit test for create short url handler', function () {
         const originalUrl = 'https://www.example.com';
         const randomAlias = peekNanoId();
 
-        const event: APIGatewayProxyEvent = newGatewayEvent('post', '/urls', {
+        const event = newGatewayEvent('post', '/urls', {
             original_url: originalUrl,
         });
-        const result: APIGatewayProxyResult = await lambdaHandler(event);
+        const result = await lambdaHandler(event);
 
         expect(result.statusCode).toEqual(201);
         expect(result.body).toEqual(
@@ -81,11 +80,11 @@ describe('Unit test for create short url handler', function () {
         const originalUrl = 'https://www.example.com';
         const providedAlias = 'customAlias';
 
-        const event: APIGatewayProxyEvent = newGatewayEvent('post', '/urls', {
+        const event = newGatewayEvent('post', '/urls', {
             original_url: originalUrl,
             alias: providedAlias,
         });
-        const result: APIGatewayProxyResult = await lambdaHandler(event);
+        const result = await lambdaHandler(event);
 
         expect(result.statusCode).toEqual(201);
         expect(result.body).toEqual(
@@ -100,11 +99,11 @@ describe('Unit test for create short url handler', function () {
         const originalUrl = 'https://www.anotherexample.com';
         const providedAlias = 'customAlias';
 
-        const event: APIGatewayProxyEvent = newGatewayEvent('post', '/urls', {
+        const event = newGatewayEvent('post', '/urls', {
             original_url: originalUrl,
             alias: providedAlias,
         });
-        const result: APIGatewayProxyResult = await lambdaHandler(event);
+        const result = await lambdaHandler(event);
 
         expect(result.statusCode).toEqual(409);
         expect(result.body).toEqual(
@@ -118,11 +117,11 @@ describe('Unit test for create short url handler', function () {
         const originalUrl = 'https://www.example.com';
         const providedAlias = '12';
 
-        const event: APIGatewayProxyEvent = newGatewayEvent('post', '/urls', {
+        const event = newGatewayEvent('post', '/urls', {
             original_url: originalUrl,
             alias: providedAlias,
         });
-        const result: APIGatewayProxyResult = await lambdaHandler(event);
+        const result = await lambdaHandler(event);
 
         expect(result.statusCode).toEqual(422);
         expect(result.body).toEqual(
@@ -136,11 +135,11 @@ describe('Unit test for create short url handler', function () {
         const originalUrl = 'https://www.example.com';
         const providedAlias = 'a'.repeat(21);
 
-        const event: APIGatewayProxyEvent = newGatewayEvent('post', '/urls', {
+        const event = newGatewayEvent('post', '/urls', {
             original_url: originalUrl,
             alias: providedAlias,
         });
-        const result: APIGatewayProxyResult = await lambdaHandler(event);
+        const result = await lambdaHandler(event);
 
         expect(result.statusCode).toEqual(422);
         expect(result.body).toEqual(
@@ -154,11 +153,11 @@ describe('Unit test for create short url handler', function () {
         const originalUrl = 'https://www.example.com';
         const providedAlias = '#!A8SD';
 
-        const event: APIGatewayProxyEvent = newGatewayEvent('post', '/urls', {
+        const event = newGatewayEvent('post', '/urls', {
             original_url: originalUrl,
             alias: providedAlias,
         });
-        const result: APIGatewayProxyResult = await lambdaHandler(event);
+        const result = await lambdaHandler(event);
 
         expect(result.statusCode).toEqual(422);
         expect(result.body).toEqual(
