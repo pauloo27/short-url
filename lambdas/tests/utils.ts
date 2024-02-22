@@ -71,3 +71,40 @@ export function newGatewayEvent<T>(method: HttpMethod, path: string, body?: T): 
         },
     };
 }
+
+export function mockDynamoDBClient() {
+    jest.mock('@aws-sdk/client-dynamodb', () => {
+        const mockedStore = new Map<string, any>();
+
+        return {
+            DynamoDBClient: jest.fn(() => ({
+                send: jest.fn((cmd: any) => {
+                    if (cmd._cmd === 'PutItemCommand') {
+                        if (mockedStore.has(cmd.Item.alias.S)) {
+                            throw {
+                                name: 'ConditionalCheckFailedException',
+                            };
+                        }
+                        mockedStore.set(cmd.Item.alias.S, cmd.Item);
+                    }
+                }),
+            })),
+            PutItemCommand: jest.fn((obj: any) => ({ ...obj, _cmd: 'PutItemCommand' })),
+        };
+    });
+}
+
+let randomIndex = 0;
+const randomIds = ['QbjLyrdo', 'Z9SykPd-', 'HsH5gIME', 'My-2f-1Z'];
+
+export function peekNanoId() {
+    return randomIds[randomIndex];
+}
+
+export function mockNanoId() {
+    jest.mock('nanoid', () => {
+        return {
+            nanoid: jest.fn(() => randomIds[randomIndex++]),
+        };
+    });
+}

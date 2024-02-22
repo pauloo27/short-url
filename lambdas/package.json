@@ -8,9 +8,11 @@
   "license": "MIT",
   "scripts": {
     "unit": "jest",
+    "unit:watch": "jest --watch",
     "lint": "eslint '*.ts' --quiet --fix",
     "compile": "tsc",
-    "test": "npm run compile && npm run unit"
+    "test": "npm run compile && npm run unit",
+    "test:watch": "npm run compile && npm run unit:watch"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.518.0",

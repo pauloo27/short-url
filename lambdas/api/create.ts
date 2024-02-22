@@ -2,31 +2,35 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { newHandler } from '../core/api';
 import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb';
 import { nanoid } from 'nanoid';
+import { Validator } from '../core/validation';
 
 const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-    const client = new DynamoDBClient();
     if (!event.body) {
         return {
             statusCode: 400,
             body: JSON.stringify({
-                message: 'Missing request body',
+                message: 'missing request body',
             }),
         };
     }
 
     const parsedBody = JSON.parse(event.body);
+    const validator = new Validator(parsedBody);
+    validator.mustBeProvided('original_url').mustBeString('original_url');
+
     const originalUrl = parsedBody.original_url;
-    if (!originalUrl) {
-        return {
-            statusCode: 422,
-            body: JSON.stringify({
-                message: 'Missing original_url in request body',
-            }),
-        };
+
+    if (parsedBody.alias) {
+        validator
+            .mustBeProvided('alias')
+            .mustBeString('alias')
+            .mustHaveLengthBetween('alias', 3, 20)
+            .mustBeAlphanumericUnderscore('alias');
     }
 
     const alias = parsedBody.alias ?? nanoid(8);
 
+    const client = new DynamoDBClient();
     const cmd = new PutItemCommand({
         TableName: process.env.TABLE_NAME!,
         Item: {
@@ -44,7 +48,7 @@ const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResu
             return {
                 statusCode: 409,
                 body: JSON.stringify({
-                    message: 'Alias already exists',
+                    message: 'alias already exists',
                 }),
             };
         }
