@@ -1,4 +1,5 @@
 const swaggerJsdoc = require('swagger-jsdoc');
+const fs = require('fs');
 
 const options = {
     definition: {
@@ -11,4 +12,4 @@ const options = {
     apis: ['./api/**/*.ts'],
 };
 
-console.log(JSON.stringify(swaggerJsdoc(options)));
+fs.writeFileSync('swagger.json', JSON.stringify(swaggerJsdoc(options)));
