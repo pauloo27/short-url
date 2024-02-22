@@ -4,6 +4,59 @@ import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb';
 import { nanoid } from 'nanoid';
 import { Validator } from '../core/validation';
 
+/**
+ * @openapi
+ * /urls/:
+ *    post:
+ *      summary: Create a short URL
+ *      requestBody:
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                original_url:
+ *                  type: string
+ *                alias:
+ *                  type: string
+ *      responses:
+ *        '201':
+ *          description: Short URL created successfully
+ *          content:
+ *            application/json:
+ *              example:
+ *                alias: generatedAlias
+ *                original_url: https://www.example.com
+ *        '400':
+ *          description: Missing request body
+ *          content:
+ *            application/json:
+ *              example:
+ *                message: missing request body
+ *        '422':
+ *          description: Unprocessable Entity
+ *          content:
+ *            application/json:
+ *              examples:
+ *                emptyOriginalUrl:
+ *                  summary: Empty original_url
+ *                  value:
+ *                    message: original_url must be provided
+ *                invalidOriginalUrlType:
+ *                  summary: Invalid original_url type
+ *                  value:
+ *                    message: original_url must be a string
+ *                invalidAlias:
+ *                  summary: Custom alias length or format invalid
+ *                  value:
+ *                    message: Alias validation error
+ *        '409':
+ *          description: Conflict
+ *          content:
+ *            application/json:
+ *              example:
+ *                message: alias already exists
+ */
 const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     if (!event.body) {
         return {

@@ -8,6 +8,7 @@
   "license": "MIT",
   "scripts": {
     "unit": "jest",
+    "swagger": "node swagger.js > swagger.json",
     "unit:watch": "jest --watch",
     "lint": "eslint '*.ts' --quiet --fix",
     "compile": "tsc",
