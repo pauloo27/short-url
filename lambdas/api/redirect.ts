@@ -17,13 +17,17 @@ import { DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb';
  *      responses:
  *        '302':
  *          description: Redirect successful, with Location header
+ *          content:
+ *            application/json:
+ *              example:
+ *                message: 'Redirecting to https://example.com'
  *        '404':
  *          description: Alias not found
  *          content:
  *            application/json:
  *              example:
- *                message: 'Alias not found'
-*/
+ *                message: 'alias not found'
+ */
 const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     const alias = event.pathParameters?.alias;
     if (!alias) {
@@ -56,7 +60,9 @@ const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResu
 
     return {
         statusCode: 302,
-        body: '',
+        body: JSON.stringify({
+            message: `Redirecting to ${result.Item.original_url.S}`,
+        }),
         headers: {
             Location: result.Item.original_url.S!,
         },

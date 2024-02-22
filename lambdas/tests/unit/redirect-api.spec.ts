@@ -28,6 +28,11 @@ describe('Unit test for redirect by alias api', function () {
         const result = await lambdaHandler(event);
 
         expect(result.statusCode).toEqual(302);
+        expect(result.body).toEqual(
+            JSON.stringify({
+                message: `Redirecting to http://example.com`,
+            }),
+        );
         expect(result.headers).toBeDefined();
         expect(result.headers!['Location']).toEqual('http://example.com');
     });
