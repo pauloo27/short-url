@@ -52,44 +52,61 @@ const baseEvent: APIGatewayProxyEvent = {
     stageVariables: {},
 };
 
-export function newGatewayEvent<T>(method: HttpMethod, path: string, body?: T): APIGatewayProxyEvent {
+export interface Path {
+    path: string;
+    pathParams?: { [key: string]: string };
+    queryParams?: { [key: string]: string };
+}
+
+export function newGatewayEvent<T>(method: HttpMethod, path: string | Path, body?: T): APIGatewayProxyEvent {
     let encodedBody: string | null = null;
     if (body) {
         encodedBody = typeof body === 'string' ? body : JSON.stringify(body);
     }
 
+    const rawPath = typeof path === 'string' ? path : path.path;
+    const queryParams = typeof path === 'string' ? {} : path.queryParams ?? {};
+    const urlParams = typeof path === 'string' ? {} : path.pathParams ?? {};
+
     return {
         ...baseEvent,
         httpMethod: method,
-        path,
+        path: rawPath,
+        queryStringParameters: queryParams,
+        pathParameters: urlParams,
         body: encodedBody,
         requestContext: {
             ...baseEvent.requestContext,
             httpMethod: method,
-            path,
-            resourcePath: path,
+            path: rawPath,
+            resourcePath: rawPath,
         },
     };
 }
 
+export const mockedStore = new Map<string, any>();
+
 export function mockDynamoDBClient() {
     jest.mock('@aws-sdk/client-dynamodb', () => {
-        const mockedStore = new Map<string, any>();
-
         return {
             DynamoDBClient: jest.fn(() => ({
                 send: jest.fn((cmd: any) => {
-                    if (cmd._cmd === 'PutItemCommand') {
-                        if (mockedStore.has(cmd.Item.alias.S)) {
-                            throw {
-                                name: 'ConditionalCheckFailedException',
-                            };
-                        }
-                        mockedStore.set(cmd.Item.alias.S, cmd.Item);
+                    switch (cmd._cmd) {
+                        case 'PutItemCommand':
+                            if (mockedStore.has(cmd.Item.alias.S)) {
+                                throw {
+                                    name: 'ConditionalCheckFailedException',
+                                };
+                            }
+                            mockedStore.set(cmd.Item.alias.S, cmd.Item);
+                            return;
+                        case 'GetItemCommand':
+                            return { Item: mockedStore.get(cmd.Key.alias.S) };
                     }
                 }),
             })),
             PutItemCommand: jest.fn((obj: any) => ({ ...obj, _cmd: 'PutItemCommand' })),
+            GetItemCommand: jest.fn((obj: any) => ({ ...obj, _cmd: 'GetItemCommand' })),
         };
     });
 }
