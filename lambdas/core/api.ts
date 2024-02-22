@@ -13,9 +13,10 @@ export function newHandler(handler: (event: APIGatewayProxyEvent) => Promise<API
                     body: JSON.stringify({ message: error.message }),
                 };
             }
+            console.error(error);
             return {
                 statusCode: 500,
-                body: JSON.stringify({ message: 'something went wrong', error }),
+                body: JSON.stringify({ message: 'something went wrong' }),
             };
         }
     };
