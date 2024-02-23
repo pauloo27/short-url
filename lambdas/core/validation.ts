@@ -5,13 +5,17 @@ export class ValidationError extends Error {
 }
 
 export class Validator<T extends Record<string, unknown>> {
-    constructor(private readonly data: T) {}
+    private constructor(private readonly data: T) {}
 
     static fromJSON<T>(data: string): Validator<Partial<T>> {
         return new Validator(JSON.parse(data));
     }
 
-    mustBeProvided<K extends keyof T>(fieldName: K): Validator<T & Required<Pick<T, K>>> {
+    static fromObject<T extends Record<string, unknown>>(obj: T): Validator<Partial<T>> {
+        return new Validator(obj);
+    }
+
+    mustBeProvided<K extends keyof T>(fieldName: K): Validator<Required<Pick<T, K>> & T> {
         const value = this.data[fieldName];
         if (value === undefined || value === null) {
             throw new ValidationError(`${fieldName.toString()} must be provided`);
@@ -75,6 +79,25 @@ export class Validator<T extends Record<string, unknown>> {
 
     isPresent<K extends keyof T>(key: K): boolean {
         return this.data[key] !== undefined;
+    }
+
+    mustBeInRange<K extends keyof T>(fieldName: K, min: number, max: number): Validator<T> {
+        const value = this.data[fieldName] as number;
+
+        if (value < min) {
+            throw new ValidationError(`${fieldName.toString()} must be at least ${min}`);
+        }
+
+        if (value > max) {
+            throw new ValidationError(`${fieldName.toString()} must be at most ${max}`);
+        }
+
+        return this;
+    }
+
+    transform<K extends keyof T, U>(key: K, transform: (value: T[K]) => U): Validator<Omit<T, K> & Record<K, U>> {
+        const newValue = transform(this.data[key]);
+        return new Validator({ ...this.data, [key]: newValue });
     }
 
     asValue(): T {

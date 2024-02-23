@@ -27,6 +27,12 @@ import { DynamoDBClient, GetItemCommand, UpdateItemCommand } from '@aws-sdk/clie
  *            application/json:
  *              example:
  *                message: 'alias not found'
+ *        '500':
+ *          description: Internal Server Error
+ *          content:
+ *            application/json:
+ *              example:
+ *                message: something went wrong
  */
 const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     const alias = event.pathParameters?.alias;

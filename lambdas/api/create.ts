@@ -20,6 +20,8 @@ type Body = {
  *          application/json:
  *            schema:
  *              type: object
+ *              required:
+ *                - original_url
  *              properties:
  *                original_url:
  *                  type: string
@@ -62,6 +64,12 @@ type Body = {
  *            application/json:
  *              example:
  *                message: alias already exists
+ *        '500':
+ *          description: Internal Server Error
+ *          content:
+ *            application/json:
+ *              example:
+ *                message: something went wrong
  */
 const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     if (!event.body) {

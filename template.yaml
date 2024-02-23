@@ -98,6 +98,36 @@ Resources:
         EntryPoints:
         - api/redirect.ts
 
+  ListFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambdas/
+      Handler: api/list.lambdaHandler
+      Runtime: nodejs18.x
+      Policies: 
+        - DynamoDBCrudPolicy:
+            TableName: 'URLShortener'
+      Environment:
+        Variables:
+          TABLE_NAME: 'URLShortener'
+          TABLE_ACCESS_COUNT_INDEX: 'AccessCountIndex'
+      Architectures:
+      - x86_64
+      Events:
+        HelloWorld:
+          Type: Api
+          Properties:
+            Path: /urls/
+            Method: get
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: es2020
+        Sourcemap: true
+        EntryPoints:
+        - api/list.ts
+
 Outputs:
   BaseAPIURL:
     Description: API Gateway endpoint URL for Prod stage

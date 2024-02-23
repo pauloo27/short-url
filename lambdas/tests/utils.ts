@@ -110,6 +110,9 @@ export function mockDynamoDBClient() {
                                 access_count: { N: (parseInt(current.access_count.N) + 1).toString() },
                             });
                             return;
+                        case 'ScanCommand':
+                            const limit = cmd.Limit;
+                            return { Items: Array.from(mockedStore.values()).slice(0, limit) };
                         case 'GetItemCommand':
                             return { Item: mockedStore.get(cmd.Key.alias.S) };
                     }
@@ -118,6 +121,7 @@ export function mockDynamoDBClient() {
             PutItemCommand: jest.fn((obj: any) => ({ ...obj, _cmd: 'PutItemCommand' })),
             GetItemCommand: jest.fn((obj: any) => ({ ...obj, _cmd: 'GetItemCommand' })),
             UpdateItemCommand: jest.fn((obj: any) => ({ ...obj, _cmd: 'UpdateItemCommand' })),
+            ScanCommand: jest.fn((obj: any) => ({ ...obj, _cmd: 'ScanCommand' })),
         };
     });
 }
