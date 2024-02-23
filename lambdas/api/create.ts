@@ -4,6 +4,11 @@ import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb';
 import { nanoid } from 'nanoid';
 import { Validator } from '../core/validation';
 
+type Body = {
+    original_url: string;
+    alias?: string;
+};
+
 /**
  * @openapi
  * /urls/:
@@ -68,13 +73,12 @@ const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResu
         };
     }
 
-    const parsedBody = JSON.parse(event.body);
-    const validator = new Validator(parsedBody);
-    validator.mustBeProvided('original_url').mustBeString('original_url').mustBeUrl('original_url');
+    const validator = Validator.fromJSON<Body>(event.body)
+        .mustBeProvided('original_url')
+        .mustBeString('original_url')
+        .mustBeUrl('original_url');
 
-    const originalUrl = parsedBody.original_url;
-
-    if (parsedBody.alias) {
+    if (validator.isPresent('alias')) {
         validator
             .mustBeProvided('alias')
             .mustBeString('alias')
@@ -82,7 +86,9 @@ const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResu
             .mustBeAlphanumericUnderscore('alias');
     }
 
-    const alias = parsedBody.alias ?? nanoid(8);
+    const body = validator.asValue();
+    const originalUrl = body.original_url;
+    const alias = body.alias ?? nanoid(8);
 
     const client = new DynamoDBClient();
     const cmd = new PutItemCommand({
