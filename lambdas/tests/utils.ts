@@ -112,7 +112,10 @@ export function mockDynamoDBClient() {
                             return;
                         case 'ScanCommand':
                             const limit = cmd.Limit;
-                            return { Items: Array.from(mockedStore.values()).slice(0, limit) };
+                            const items = Array.from(mockedStore.values()).slice(0, limit);
+                            const count = items.length;
+
+                            return { Items: items, Count: count };
                         case 'GetItemCommand':
                             return { Item: mockedStore.get(cmd.Key.alias.S) };
                     }

@@ -49,6 +49,7 @@ describe('Unit test for list most accessed urls api', function () {
         expect(result.statusCode).toEqual(200);
         expect(result.body).toEqual(
             JSON.stringify({
+                count: 0,
                 limit: 15,
                 items: [],
             }),
@@ -62,6 +63,7 @@ describe('Unit test for list most accessed urls api', function () {
         expect(result.statusCode).toEqual(200);
         expect(result.body).toEqual(
             JSON.stringify({
+                count: 0,
                 limit: 10,
                 items: [],
             }),
@@ -83,6 +85,7 @@ describe('Unit test for list most accessed urls api', function () {
         expect(result.statusCode).toEqual(200);
         expect(result.body).toEqual(
             JSON.stringify({
+                count: 2,
                 limit: 2,
                 items: [
                     { alias: 'alias00', original_url: 'http://example.com/0', access_count: 100 },

@@ -25,6 +25,7 @@ const defaultLimit = 10;
  *            application/json:
  *              example:
  *                limit: 10
+ *                count: 5
  *                items:
  *                  - alias: 'alias1'
  *                    original_url: 'https://www.example.com/1'
@@ -76,8 +77,8 @@ const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResu
     return {
         statusCode: 200,
         body: JSON.stringify({
-            limit,
             count: result.Count,
+            limit,
             items: result.Items ? result.Items.map(formatItem) : [],
         }),
     };
