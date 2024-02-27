@@ -1,6 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { newHandler } from '../core/api';
-import { DynamoDBClient, ScanCommand } from '@aws-sdk/client-dynamodb';
+import { URLRepository } from '../core/repo/url-repository';
 import { Validator } from '../core/validation';
 
 const defaultLimit = 10;
@@ -64,32 +64,19 @@ const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResu
         }
     }
 
-    const client = new DynamoDBClient();
+    const repo = new URLRepository(process.env.TABLE_NAME!);
+    const indexName = process.env.TABLE_ACCESS_COUNT_INDEX!;
 
-    const result = await client.send(
-        new ScanCommand({
-            TableName: process.env.TABLE_NAME,
-            IndexName: process.env.TABLE_ACCESS_COUNT_INDEX,
-            Limit: limit,
-        }),
-    );
+    const result = await repo.listByAccessCount(indexName, limit);
 
     return {
         statusCode: 200,
         body: JSON.stringify({
-            count: result.Count,
+            count: result.count,
             limit,
-            items: result.Items ? result.Items.map(formatItem) : [],
+            items: result.items,
         }),
     };
 };
-
-function formatItem(item: any) {
-    return {
-        alias: item.alias.S,
-        original_url: item.original_url.S,
-        access_count: parseInt(item.access_count.N),
-    };
-}
 
 export const lambdaHandler = newHandler(handler);

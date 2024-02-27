@@ -1,8 +1,8 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { newHandler } from '../core/api';
-import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb';
 import { nanoid } from 'nanoid';
 import { Validator } from '../core/validation';
+import { URLRepository } from '../core/repo/url-repository';
 
 type Body = {
     original_url: string;
@@ -81,6 +81,8 @@ const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResu
         };
     }
 
+    const repo = new URLRepository(process.env.TABLE_NAME!);
+
     const validator = Validator.fromJSON<Body>(event.body)
         .mustBeProvided('original_url')
         .mustBeString('original_url')
@@ -98,19 +100,8 @@ const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResu
     const originalUrl = body.original_url;
     const alias = body.alias ?? nanoid(8);
 
-    const client = new DynamoDBClient();
-    const cmd = new PutItemCommand({
-        TableName: process.env.TABLE_NAME!,
-        Item: {
-            alias: { S: alias },
-            original_url: { S: originalUrl },
-            access_count: { N: '0' },
-        },
-        ConditionExpression: 'attribute_not_exists(alias)',
-    });
-
     try {
-        await client.send(cmd);
+        await repo.create({ alias, original_url: originalUrl });
     } catch (e: any) {
         if ('name' in e && e.name === 'ConditionalCheckFailedException') {
             return {

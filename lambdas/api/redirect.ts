@@ -1,6 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { newHandler } from '../core/api';
-import { DynamoDBClient, GetItemCommand, UpdateItemCommand } from '@aws-sdk/client-dynamodb';
+import { URLRepository } from '../core/repo/url-repository';
 
 /**
  * @openapi
@@ -45,17 +45,11 @@ const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResu
         };
     }
 
-    const client = new DynamoDBClient();
-    const result = await client.send(
-        new GetItemCommand({
-            TableName: process.env.TABLE_NAME,
-            Key: {
-                alias: { S: alias },
-            },
-        }),
-    );
+    const repo = new URLRepository(process.env.TABLE_NAME!);
 
-    if (!result.Item) {
+    const result = await repo.findOneByAlias(alias);
+
+    if (!result) {
         return {
             statusCode: 404,
             body: JSON.stringify({
@@ -64,26 +58,15 @@ const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResu
         };
     }
 
-    await client.send(
-        new UpdateItemCommand({
-            TableName: process.env.TABLE_NAME!,
-            Key: {
-                alias: { S: alias },
-            },
-            UpdateExpression: 'SET access_count = access_count + :one',
-            ExpressionAttributeValues: {
-                ':one': { N: '1' },
-            },
-        }),
-    );
+    await repo.incrementAccessCount(alias);
 
     return {
         statusCode: 302,
         body: JSON.stringify({
-            message: `Redirecting to ${result.Item.original_url.S}`,
+            message: `Redirecting to ${result.original_url}`,
         }),
         headers: {
-            Location: result.Item.original_url.S!,
+            Location: result.original_url,
         },
     };
 };
