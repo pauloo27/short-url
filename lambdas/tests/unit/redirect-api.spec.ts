@@ -21,6 +21,7 @@ describe('Unit test for redirect by alias api', function () {
     it('should redirect with 302 when the alias exist', async () => {
         const alias = 'created';
         mockedStore.set(alias, {
+            alias: { S: alias },
             original_url: { S: 'http://example.com' },
             access_count: { N: '0' },
         });
@@ -41,6 +42,7 @@ describe('Unit test for redirect by alias api', function () {
     it('should increment the access_count', async () => {
         const alias = 'created';
         mockedStore.set(alias, {
+            alias: { S: alias },
             original_url: { S: 'http://example.com' },
             access_count: { N: '0' },
         });

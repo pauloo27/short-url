@@ -7,13 +7,12 @@
   "author": "SAM CLI",
   "license": "MIT",
   "scripts": {
-    "unit": "jest",
     "swagger": "node swagger.js",
-    "unit:watch": "jest --watch",
+    "jest": "jest",
     "lint": "eslint '*.ts' --quiet --fix",
     "compile": "tsc",
-    "test": "npm run compile && npm run unit",
-    "test:watch": "npm run compile && npm run unit:watch"
+    "test": "npm run compile && jest",
+    "test:watch": "npm run compile && jest --watch"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.518.0",
